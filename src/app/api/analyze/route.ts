@@ -16,6 +16,8 @@ import type { Analysis } from '@/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+// Gemini can take up to ~30 s (plus a retry), which is longer than some hosts' default limit.
+export const maxDuration = 60;
 
 /** Results are keyed by a hash of the redacted content, so the cache never holds raw PII. */
 const cache = new LruCache<Analysis>();
