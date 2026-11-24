@@ -5,15 +5,18 @@
  * Light is the default; dark follows the system; high contrast is a user switch that wins over both.
  */
 :root {
-  --bg: #f4f6fb;
+  --bg: #f5f6fb;
   --surface: #ffffff;
-  --ink: #111827;
-  --muted: #4b5563;
-  --primary: #1d4ed8;
+  --ink: #0f172a;
+  --muted: #475569;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
   --on-primary: #ffffff;
-  --edge: #6b7280;
-  --edge-soft: #d1d5db;
-  --focus: #1d4ed8;
+  --primary-soft: #eef2ff;
+  --primary-ink: #3730a3;
+  --edge: #64748b;
+  --edge-soft: #e2e8f0;
+  --focus: #4338ca;
   --danger: #b91c1c;
   --danger-bg: #fef2f2;
   --risk-low-bg: #ecfdf3;
@@ -22,18 +25,25 @@
   --risk-medium-ink: #78350f;
   --risk-high-bg: #fef2f2;
   --risk-high-ink: #7f1d1d;
+  --hero-from: #eef2ff;
+  --hero-via: #f5f3ff;
+  --hero-to: #ecfeff;
+  --elevation: 0 1px 2px rgb(15 23 42 / 0.05), 0 12px 28px -16px rgb(30 41 120 / 0.28);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1020;
+    --bg: #0a0f1f;
     --surface: #121a30;
     --ink: #f1f5f9;
     --muted: #cbd5e1;
-    --primary: #93c5fd;
+    --primary: #a5b4fc;
+    --primary-hover: #c7d2fe;
     --on-primary: #0b1020;
+    --primary-soft: #1b2250;
+    --primary-ink: #c7d2fe;
     --edge: #94a3b8;
-    --edge-soft: #334155;
+    --edge-soft: #2b3652;
     --focus: #fbbf24;
     --danger: #fecaca;
     --danger-bg: #450a0a;
@@ -43,6 +53,10 @@
     --risk-medium-ink: #fde68a;
     --risk-high-bg: #450a0a;
     --risk-high-ink: #fecaca;
+    --hero-from: #1b2250;
+    --hero-via: #1a1740;
+    --hero-to: #0d2a3a;
+    --elevation: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 28px -16px rgb(0 0 0 / 0.7);
   }
 }
 
@@ -52,7 +66,10 @@ html[data-contrast='high'] {
   --ink: #ffffff;
   --muted: #ffffff;
   --primary: #ffff00;
+  --primary-hover: #ffffff;
   --on-primary: #000000;
+  --primary-soft: #000000;
+  --primary-ink: #ffff00;
   --edge: #ffffff;
   --edge-soft: #ffffff;
   --focus: #00ffff;
@@ -64,6 +81,10 @@ html[data-contrast='high'] {
   --risk-medium-ink: #ffffff;
   --risk-high-bg: #000000;
   --risk-high-ink: #ffffff;
+  --hero-from: #000000;
+  --hero-via: #000000;
+  --hero-to: #000000;
+  --elevation: none;
 }
 
 @theme inline {
@@ -72,11 +93,15 @@ html[data-contrast='high'] {
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-ink: var(--primary-ink);
   --color-edge: var(--edge);
   --color-edge-soft: var(--edge-soft);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
+  --shadow-card: var(--elevation);
   --font-sans:
     var(--font-latin), var(--font-devanagari), var(--font-tamil), var(--font-telugu),
     var(--font-kannada), var(--font-malayalam), var(--font-bengali), system-ui, sans-serif;
@@ -101,6 +126,10 @@ body {
   overflow-wrap: anywhere;
 }
 
+input[type='checkbox'] {
+  accent-color: var(--primary);
+}
+
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
@@ -123,7 +152,7 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 text-center font-semibold;
+    @apply inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-4 py-2 text-center font-semibold transition-colors duration-150;
   }
   .btn:disabled {
     @apply cursor-not-allowed opacity-60;
@@ -131,17 +160,54 @@ body {
   .btn-primary {
     @apply border-primary bg-primary text-on-primary;
   }
+  .btn-primary:hover:not(:disabled) {
+    @apply border-primary-hover bg-primary-hover;
+  }
   .btn-secondary {
-    @apply border-edge bg-surface text-ink;
+    @apply border-edge-soft bg-surface text-ink;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    @apply border-primary bg-primary-soft;
   }
   .btn-secondary[aria-pressed='true'] {
     @apply border-primary bg-primary text-on-primary;
   }
+  html[data-contrast='high'] .btn-secondary {
+    @apply border-edge;
+  }
   .card {
-    @apply rounded-2xl border border-edge-soft bg-surface p-5 shadow-sm sm:p-6;
+    @apply rounded-3xl border border-edge-soft bg-surface p-5 shadow-card sm:p-7;
+  }
+  .card-title {
+    @apply flex items-center gap-3 text-xl font-bold;
+  }
+  .icon-chip {
+    @apply inline-grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-ink;
+  }
+  html[data-contrast='high'] .icon-chip {
+    @apply border-2 border-edge;
   }
   .field {
-    @apply w-full rounded-lg border-2 border-edge bg-surface p-3 text-ink;
+    @apply w-full rounded-xl border-2 border-edge-soft bg-surface p-3 text-ink transition-colors;
+  }
+  .field:hover:not(:disabled) {
+    @apply border-edge;
+  }
+  .field:focus {
+    @apply border-primary;
+  }
+  html[data-contrast='high'] .field {
+    @apply border-edge;
+  }
+  .hero {
+    @apply rounded-3xl border border-edge-soft p-6 shadow-card sm:p-10;
+    background: linear-gradient(135deg, var(--hero-from), var(--hero-via) 55%, var(--hero-to));
+  }
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-edge-soft bg-surface px-3 py-1 text-sm font-semibold;
+  }
+  .tile {
+    @apply rounded-2xl border border-edge-soft bg-bg p-4;
   }
   .risk-low {
     @apply border-2;
@@ -160,6 +226,18 @@ body {
     background: var(--risk-high-bg);
     color: var(--risk-high-ink);
     border-color: var(--risk-high-ink);
+  }
+  .result-card {
+    @apply border-t-8;
+  }
+  .result-card[data-risk='low'] {
+    border-top-color: var(--risk-low-ink);
+  }
+  .result-card[data-risk='medium'] {
+    border-top-color: var(--risk-medium-ink);
+  }
+  .result-card[data-risk='high'] {
+    border-top-color: var(--risk-high-ink);
   }
 }
 

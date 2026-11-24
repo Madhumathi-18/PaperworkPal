@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Icon } from '@/components/Icon';
 import { buildChatContext } from '@/lib/analysisText';
 import { messageFromError, requestFollowUp } from '@/lib/client/api';
 import { MAX_CHAT_HISTORY, MAX_QUESTION_CHARS } from '@/lib/constants';
@@ -55,10 +56,13 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
 
   return (
     <section aria-labelledby="chat-heading" className="card">
-      <h3 id="chat-heading" lang="en" className="text-xl font-bold">
+      <h3 id="chat-heading" lang="en" className="card-title">
+        <span className="icon-chip">
+          <Icon name="chat" />
+        </span>
         Ask a follow-up
       </h3>
-      <p lang="en" className="mt-1 text-muted">
+      <p lang="en" className="mt-2 text-muted">
         Ask about this document only. If the answer is not in it, we will say so.
       </p>
 
@@ -69,8 +73,8 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
             lang={message.role === 'assistant' ? getLanguage(analysis.language).bcp47 : undefined}
             className={
               message.role === 'user'
-                ? 'rounded-lg border border-edge-soft p-3 font-semibold'
-                : 'rounded-lg bg-bg p-3'
+                ? 'ml-auto w-fit max-w-[90%] rounded-2xl rounded-br-md bg-primary px-4 py-3 font-semibold text-on-primary'
+                : 'w-fit max-w-[90%] rounded-2xl rounded-bl-md border border-edge-soft bg-bg px-4 py-3'
             }
           >
             <span lang="en" className="sr-only">
@@ -79,36 +83,43 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
             {message.content}
           </p>
         ))}
-        {pending && <p lang="en">Thinking…</p>}
+        {pending && (
+          <p lang="en" className="animate-pulse text-muted">
+            Thinking…
+          </p>
+        )}
       </div>
 
       <form onSubmit={ask} className="mt-4 space-y-3">
         <label htmlFor="follow-up" lang="en" className="block font-semibold">
           Your question
         </label>
-        <input
-          ref={inputRef}
-          id="follow-up"
-          type="text"
-          className="field"
-          maxLength={MAX_QUESTION_CHARS}
-          value={question}
-          disabled={pending}
-          onChange={(event) => setQuestion(event.target.value)}
-        />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <input
+            ref={inputRef}
+            id="follow-up"
+            type="text"
+            className="field flex-1"
+            maxLength={MAX_QUESTION_CHARS}
+            value={question}
+            disabled={pending}
+            onChange={(event) => setQuestion(event.target.value)}
+          />
+          <button
+            type="submit"
+            lang="en"
+            className="btn btn-primary px-6"
+            disabled={pending || !question.trim()}
+          >
+            <Icon name="send" className="size-4" />
+            Ask
+          </button>
+        </div>
         {error && (
           <p lang="en" className="font-semibold text-danger">
             {error}
           </p>
         )}
-        <button
-          type="submit"
-          lang="en"
-          className="btn btn-primary"
-          disabled={pending || !question.trim()}
-        >
-          Ask
-        </button>
       </form>
     </section>
   );

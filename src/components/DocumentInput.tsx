@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from 'react';
+import { Icon } from '@/components/Icon';
 import { VoiceInputButton } from '@/components/VoiceInputButton';
 import { ALLOWED_UPLOAD_TYPES, DEFAULT_MAX_UPLOAD_MB, MAX_TEXT_CHARS } from '@/lib/constants';
 import { checkFile } from '@/lib/client/files';
@@ -56,81 +57,100 @@ export function DocumentInput({
 
   return (
     <form onSubmit={submit} className="card space-y-6" noValidate>
-      <section aria-labelledby="upload-heading">
-        <h2 id="upload-heading" className="text-xl font-bold">
-          Upload or take a photo
-        </h2>
-        <label htmlFor="file" className="mt-2 block text-muted">
-          Photo or PDF of your letter (JPG, PNG, WEBP or PDF, up to {DEFAULT_MAX_UPLOAD_MB} MB)
-        </label>
-        <input
-          ref={fileInput}
-          id="file"
-          type="file"
-          accept={FILE_TYPES}
-          disabled={loading}
-          onChange={(event) => chooseFile(event.target.files?.[0])}
-          className="field mt-2 file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-on-primary"
-        />
-        {file && (
-          <div className="mt-3 space-y-3">
-            <p>
-              Selected: <strong>{file.name}</strong>{' '}
-              <button type="button" className="btn btn-secondary ml-2" onClick={removeFile}>
-                Remove file
-              </button>
-            </p>
-            <label className="flex min-h-11 items-start gap-3">
-              <input
-                type="checkbox"
-                className="mt-1 size-6 shrink-0"
-                checked={consent}
-                onChange={(event) => setConsent(event.target.checked)}
-              />
-              <span>
-                I understand this file is sent to Google&apos;s Gemini AI, and personal details in
-                it cannot be hidden automatically.
-              </span>
-            </label>
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="paste-heading">
-        <h2 id="paste-heading" className="text-xl font-bold">
-          Or paste the text
-        </h2>
-        <label htmlFor="document-text" className="mt-2 block text-muted">
-          Text of your letter
-        </label>
-        <textarea
-          id="document-text"
-          className="field mt-2 min-h-48"
-          rows={8}
-          maxLength={MAX_TEXT_CHARS}
-          value={text}
-          disabled={loading}
-          aria-describedby="text-count"
-          onChange={(event) => setText(event.target.value)}
-        />
-        <p id="text-count" className="mt-1 text-sm text-muted">
-          {text.length.toLocaleString('en-IN')} of {MAX_TEXT_CHARS.toLocaleString('en-IN')}{' '}
-          characters
-        </p>
-        <div className="mt-3">
-          <VoiceInputButton
-            lang={getLanguage(language).bcp47}
-            onText={(spoken) =>
-              setText((previous) => (previous ? `${previous} ${spoken}` : spoken))
-            }
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
+        <section aria-labelledby="upload-heading">
+          <h2 id="upload-heading" className="card-title">
+            <span className="icon-chip">
+              <Icon name="upload" />
+            </span>
+            Upload or take a photo
+          </h2>
+          <label htmlFor="file" className="mt-2 block text-muted">
+            Photo or PDF of your letter (JPG, PNG, WEBP or PDF, up to {DEFAULT_MAX_UPLOAD_MB} MB)
+          </label>
+          <input
+            ref={fileInput}
+            id="file"
+            type="file"
+            accept={FILE_TYPES}
+            disabled={loading}
+            onChange={(event) => chooseFile(event.target.files?.[0])}
+            className="field mt-3 cursor-pointer border-dashed bg-primary-soft py-6 lg:py-16 file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-on-primary hover:file:bg-primary-hover"
           />
-        </div>
-      </section>
+          {file && (
+            <div className="mt-3 space-y-3">
+              <p className="tile flex flex-wrap items-center justify-between gap-3">
+                <span>
+                  Selected: <strong>{file.name}</strong>
+                </span>
+                <button type="button" className="btn btn-secondary" onClick={removeFile}>
+                  <Icon name="trash" className="size-4" />
+                  Remove file
+                </button>
+              </p>
+              <label className="flex min-h-11 items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 size-6 shrink-0"
+                  checked={consent}
+                  onChange={(event) => setConsent(event.target.checked)}
+                />
+                <span>
+                  I understand this file is sent to Google&apos;s Gemini AI, and personal details in
+                  it cannot be hidden automatically.
+                </span>
+              </label>
+            </div>
+          )}
+        </section>
 
-      {problem && <p className="font-semibold text-danger">{problem}</p>}
+        <hr className="border-edge-soft lg:hidden" />
+
+        <section aria-labelledby="paste-heading">
+          <h2 id="paste-heading" className="card-title">
+            <span className="icon-chip">
+              <Icon name="text" />
+            </span>
+            Or paste the text
+          </h2>
+          <label htmlFor="document-text" className="mt-2 block text-muted">
+            Text of your letter
+          </label>
+          <textarea
+            id="document-text"
+            className="field mt-2 min-h-48"
+            rows={8}
+            maxLength={MAX_TEXT_CHARS}
+            value={text}
+            disabled={loading}
+            aria-describedby="text-count"
+            onChange={(event) => setText(event.target.value)}
+          />
+          <p id="text-count" className="mt-2 text-sm text-muted">
+            {text.length.toLocaleString('en-IN')} of {MAX_TEXT_CHARS.toLocaleString('en-IN')}{' '}
+            characters
+          </p>
+          <div className="mt-3">
+            <VoiceInputButton
+              lang={getLanguage(language).bcp47}
+              onText={(spoken) =>
+                setText((previous) => (previous ? `${previous} ${spoken}` : spoken))
+              }
+            />
+          </div>
+        </section>
+      </div>
+
+      {problem && (
+        <p className="flex items-start gap-2 rounded-xl border-2 border-danger bg-danger-bg p-3 font-semibold text-danger">
+          <Icon name="info" className="mt-1 size-5 shrink-0" />
+          {problem}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" className="btn btn-primary text-lg" disabled={loading}>
+        <button type="submit" className="btn btn-primary px-6 text-lg" disabled={loading}>
+          <Icon name="file" />
           Explain my document
         </button>
         {loading && (

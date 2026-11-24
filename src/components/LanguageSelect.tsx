@@ -1,3 +1,4 @@
+import { Icon } from '@/components/Icon';
 import { LANGUAGES, type LanguageCode } from '@/lib/languages';
 
 interface LanguageSelectProps {
@@ -13,13 +14,16 @@ export function LanguageSelect({
   disabled,
 }: LanguageSelectProps): React.ReactElement {
   return (
-    <div>
-      <label htmlFor="language" className="block text-lg font-semibold">
+    <div className="card flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <label htmlFor="language" className="flex items-center gap-3 text-lg font-semibold">
+        <span className="icon-chip">
+          <Icon name="globe" />
+        </span>
         Explain it in this language
       </label>
       <select
         id="language"
-        className="field mt-2 min-h-11 sm:max-w-xs"
+        className="field min-h-11 sm:max-w-xs"
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value as LanguageCode)}

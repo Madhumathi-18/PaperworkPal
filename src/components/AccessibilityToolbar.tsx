@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from '@/components/Icon';
 import { usePreferences } from '@/hooks/usePreferences';
 import type { TextSize } from '@/lib/client/preferences';
 
@@ -15,12 +16,12 @@ export function AccessibilityToolbar(): React.ReactElement {
 
   return (
     <nav aria-label="Display settings" className="flex flex-wrap items-center gap-2">
-      <div role="group" aria-label="Text size" className="flex gap-2">
+      <div role="group" aria-label="Text size" className="flex gap-1.5">
         {SIZE_BUTTONS.map(({ size, label, name }) => (
           <button
             key={size}
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary px-3"
             aria-label={name}
             aria-pressed={preferences.textSize === size}
             onClick={() => update({ textSize: size })}
@@ -31,11 +32,13 @@ export function AccessibilityToolbar(): React.ReactElement {
       </div>
       <button
         type="button"
-        className="btn btn-secondary"
+        className="btn btn-secondary px-3"
+        title="High contrast"
         aria-pressed={preferences.highContrast}
         onClick={() => update({ highContrast: !preferences.highContrast })}
       >
-        High contrast
+        <Icon name="contrast" />
+        <span className="sr-only">High contrast</span>
       </button>
     </nav>
   );

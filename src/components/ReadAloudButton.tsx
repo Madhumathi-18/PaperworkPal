@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from '@/components/Icon';
 import { useReadAloud } from '@/hooks/useReadAloud';
 
 interface ReadAloudButtonProps {
@@ -30,7 +31,8 @@ export function ReadAloudButton({
       <div className="flex flex-wrap gap-3">
         {status === 'idle' && (
           <button type="button" className="btn btn-primary" onClick={start}>
-            <span aria-hidden="true">🔊</span> Read aloud
+            <Icon name="volume" />
+            Read aloud
           </button>
         )}
         {status === 'speaking' && (

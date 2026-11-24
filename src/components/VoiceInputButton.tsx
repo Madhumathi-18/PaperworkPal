@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Icon } from '@/components/Icon';
 import { isRecognitionSupported, startDictation } from '@/lib/speech';
 
 const subscribeToNothing = (): (() => void) => () => undefined;
@@ -47,7 +48,7 @@ export function VoiceInputButton({ lang, onText }: VoiceInputButtonProps): React
         disabled={!supported}
         onClick={toggle}
       >
-        <span aria-hidden="true">{listening ? '■' : '🎤'}</span>
+        <Icon name={listening ? 'stop' : 'mic'} />
         {listening ? 'Stop listening' : 'Speak instead of typing'}
       </button>
       <p className="mt-1 text-sm text-muted" role="status">

@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from '@/components/Icon';
 import { buildDeadlineEvent } from '@/lib/analysisText';
 import { buildGoogleCalendarUrl, buildIcs } from '@/lib/calendar';
 import { downloadTextFile } from '@/lib/client/download';
@@ -23,20 +24,33 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
 
   return (
     <section aria-labelledby="deadline-heading" className="card">
-      <h3 id="deadline-heading" lang="en" className="text-xl font-bold">
+      <h3 id="deadline-heading" lang="en" className="card-title">
+        <span className="icon-chip">
+          <Icon name="calendar" />
+        </span>
         Deadline
       </h3>
       {date && days !== null && event ? (
         <>
-          <p className="mt-2 text-2xl font-bold">
-            <span aria-hidden="true">{urgent ? '⏰ ' : '📅 '}</span>
+          <p className="mt-4 flex items-center gap-3 text-2xl font-extrabold sm:text-3xl">
+            <Icon
+              name={urgent ? 'clock' : 'calendar'}
+              className="size-7 shrink-0 text-primary-ink"
+            />
             {formatIsoDate(date, analysis.language)}
           </p>
-          <p lang="en" className={urgent ? 'font-bold' : 'text-muted'}>
+          <p
+            lang="en"
+            className={
+              urgent
+                ? 'risk-high mt-2 inline-block rounded-full px-3 py-0.5 font-bold'
+                : 'mt-1 font-semibold text-muted'
+            }
+          >
             {days < 0 ? 'This date has passed: ' : urgent ? 'Soon: ' : ''}
             {describeDaysLeft(days)}
           </p>
-          <p className="mt-3">
+          <p className="tile mt-4">
             <strong lang="en">If you miss it: </strong>
             {consequenceIfMissed}
           </p>
@@ -47,6 +61,7 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
               target="_blank"
               rel="noopener noreferrer"
             >
+              <Icon name="calendar" />
               Add to Google Calendar<span className="sr-only"> (opens in a new tab)</span>
             </a>
             <button
@@ -56,12 +71,13 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
                 downloadTextFile('paperwork-pal-deadline.ics', buildIcs(event), 'text/calendar')
               }
             >
+              <Icon name="download" />
               Download .ics file
             </button>
           </div>
         </>
       ) : (
-        <p className="mt-2">
+        <p className="mt-3">
           <span lang="en">No deadline was found in this document. </span>
           {consequenceIfMissed}
         </p>

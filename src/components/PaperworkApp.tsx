@@ -3,11 +3,28 @@
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { DocumentInput } from '@/components/DocumentInput';
+import { Icon } from '@/components/Icon';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { SampleDocuments } from '@/components/SampleDocuments';
 import { useAnalysisFlow, type FlowState } from '@/hooks/useAnalysisFlow';
 import { DEFAULT_LANGUAGE, type LanguageCode } from '@/lib/languages';
+
+/** Grey placeholder shapes shown while Gemini works. Hidden from screen readers (the live region speaks). */
+function LoadingSkeleton(): React.ReactElement {
+  return (
+    <div aria-hidden="true" className="card animate-pulse space-y-4">
+      <div className="h-8 w-2/3 rounded-lg bg-primary-soft" />
+      <div className="h-4 w-full rounded bg-primary-soft" />
+      <div className="h-4 w-11/12 rounded bg-primary-soft" />
+      <div className="h-4 w-3/4 rounded bg-primary-soft" />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="h-16 rounded-2xl bg-primary-soft" />
+        <div className="h-16 rounded-2xl bg-primary-soft" />
+      </div>
+    </div>
+  );
+}
 
 // The result screen is only needed after an analysis, so it loads on demand.
 const ResultCard = dynamic(() => import('@/components/ResultCard').then((m) => m.ResultCard), {
@@ -52,17 +69,6 @@ export function PaperworkApp(): React.ReactElement {
         onCancel={cancel}
       />
 
-      {state.status === 'error' && (
-        <div className="card border-2 border-edge">
-          <h2 className="text-xl font-bold text-danger">We could not explain this document</h2>
-          <p className="mt-1">{state.message}</p>
-        </div>
-      )}
-
-      {state.status === 'success' && (
-        <ResultCard key={state.analysis.summary} analysis={state.analysis} />
-      )}
-
       <SampleDocuments
         disabled={loading}
         onSelect={(sample) => {
@@ -70,6 +76,24 @@ export function PaperworkApp(): React.ReactElement {
           void run({ text: sample, language });
         }}
       />
+
+      {loading && <LoadingSkeleton />}
+
+      {state.status === 'error' && (
+        <div className="card flex items-start gap-4 border-2 border-danger bg-danger-bg">
+          <span className="icon-chip">
+            <Icon name="info" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold text-danger">We could not explain this document</h2>
+            <p className="mt-1">{state.message}</p>
+          </div>
+        </div>
+      )}
+
+      {state.status === 'success' && (
+        <ResultCard key={state.analysis.summary} analysis={state.analysis} />
+      )}
 
       <PrivacyNotice />
     </div>

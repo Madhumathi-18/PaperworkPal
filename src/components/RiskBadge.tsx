@@ -31,7 +31,7 @@ export function RiskBadge({ level }: { level: RiskLevel }): React.ReactElement {
   return (
     <span
       lang="en"
-      className={`${className} inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-1 font-bold`}
+      className={`${className} inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-1 font-bold shadow-sm`}
     >
       <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true" focusable="false">
         {icon}
