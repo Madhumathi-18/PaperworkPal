@@ -1,0 +1,175 @@
+@import 'tailwindcss';
+
+/*
+ * Colour tokens. Every text/background pair is at least 4.5:1 (WCAG AA).
+ * Light is the default; dark follows the system; high contrast is a user switch that wins over both.
+ */
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --ink: #111827;
+  --muted: #4b5563;
+  --primary: #1d4ed8;
+  --on-primary: #ffffff;
+  --edge: #6b7280;
+  --edge-soft: #d1d5db;
+  --focus: #1d4ed8;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --risk-low-bg: #ecfdf3;
+  --risk-low-ink: #14532d;
+  --risk-medium-bg: #fffbeb;
+  --risk-medium-ink: #78350f;
+  --risk-high-bg: #fef2f2;
+  --risk-high-ink: #7f1d1d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --surface: #121a30;
+    --ink: #f1f5f9;
+    --muted: #cbd5e1;
+    --primary: #93c5fd;
+    --on-primary: #0b1020;
+    --edge: #94a3b8;
+    --edge-soft: #334155;
+    --focus: #fbbf24;
+    --danger: #fecaca;
+    --danger-bg: #450a0a;
+    --risk-low-bg: #052e16;
+    --risk-low-ink: #bbf7d0;
+    --risk-medium-bg: #422006;
+    --risk-medium-ink: #fde68a;
+    --risk-high-bg: #450a0a;
+    --risk-high-ink: #fecaca;
+  }
+}
+
+html[data-contrast='high'] {
+  --bg: #000000;
+  --surface: #000000;
+  --ink: #ffffff;
+  --muted: #ffffff;
+  --primary: #ffff00;
+  --on-primary: #000000;
+  --edge: #ffffff;
+  --edge-soft: #ffffff;
+  --focus: #00ffff;
+  --danger: #ffffff;
+  --danger-bg: #000000;
+  --risk-low-bg: #000000;
+  --risk-low-ink: #ffffff;
+  --risk-medium-bg: #000000;
+  --risk-medium-ink: #ffffff;
+  --risk-high-bg: #000000;
+  --risk-high-ink: #ffffff;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-edge: var(--edge);
+  --color-edge-soft: var(--edge-soft);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --font-sans:
+    var(--font-latin), var(--font-devanagari), var(--font-tamil), var(--font-telugu),
+    var(--font-kannada), var(--font-malayalam), var(--font-bengali), system-ui, sans-serif;
+}
+
+/* A- / A / A+ buttons set data-text-size. Everything is sized in rem, so it all scales. */
+html {
+  font-size: 112.5%;
+}
+html[data-text-size='small'] {
+  font-size: 100%;
+}
+html[data-text-size='large'] {
+  font-size: 137.5%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 50;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 text-center font-semibold;
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+  .btn-primary {
+    @apply border-primary bg-primary text-on-primary;
+  }
+  .btn-secondary {
+    @apply border-edge bg-surface text-ink;
+  }
+  .btn-secondary[aria-pressed='true'] {
+    @apply border-primary bg-primary text-on-primary;
+  }
+  .card {
+    @apply rounded-2xl border border-edge-soft bg-surface p-5 shadow-sm sm:p-6;
+  }
+  .field {
+    @apply w-full rounded-lg border-2 border-edge bg-surface p-3 text-ink;
+  }
+  .risk-low {
+    @apply border-2;
+    background: var(--risk-low-bg);
+    color: var(--risk-low-ink);
+    border-color: var(--risk-low-ink);
+  }
+  .risk-medium {
+    @apply border-2;
+    background: var(--risk-medium-bg);
+    color: var(--risk-medium-ink);
+    border-color: var(--risk-medium-ink);
+  }
+  .risk-high {
+    @apply border-2;
+    background: var(--risk-high-bg);
+    color: var(--risk-high-ink);
+    border-color: var(--risk-high-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
