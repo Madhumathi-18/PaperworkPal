@@ -103,6 +103,20 @@ describe('result screen semantics', () => {
     expect(heading.closest('section')).toHaveAttribute('lang', 'ta-IN');
   });
 
+  it('shows the fixed headings and buttons in the language of the explanation', () => {
+    render(<ResultCard analysis={{ ...validAnalysis, language: 'ta' }} />);
+    expect(screen.getByRole('heading', { level: 3, name: 'சுருக்கம்' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'கடைசி தேதி' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'செய்ய வேண்டியவை' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'மேலும் கேள்வி கேளுங்கள்' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'கேளுங்கள்' })).toBeInTheDocument();
+    expect(screen.getByText('நடுத்தர ஆபத்து')).toBeInTheDocument();
+    expect(screen.queryByText('Medium risk')).toBeNull();
+    // No English headings are left behind.
+    expect(screen.queryByRole('heading', { name: 'Summary' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Deadline' })).toBeNull();
+  });
+
   it('keeps the heading order logical (h2 then h3s)', () => {
     render(<ResultCard analysis={validAnalysis} />);
     const levels = screen.getAllByRole('heading').map((heading) => Number(heading.tagName[1]));

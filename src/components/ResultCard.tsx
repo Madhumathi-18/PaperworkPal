@@ -9,16 +9,19 @@ import { ReadAloudButton } from '@/components/ReadAloudButton';
 import { RiskBadge } from '@/components/RiskBadge';
 import { buildReadAloudText } from '@/lib/analysisText';
 import { formatIsoDate } from '@/lib/dates';
+import { getLabels } from '@/lib/labels';
 import { getLanguage } from '@/lib/languages';
 import type { Analysis } from '@/types';
 
 /**
  * The full explanation. Focus moves to its heading when it appears, and the container carries
- * the output language so screen readers pronounce the content correctly.
+ * the output language so screen readers pronounce the content correctly. The fixed headings
+ * are in the same language as the explanation.
  */
 export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactElement {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const language = getLanguage(analysis.language);
+  const labels = getLabels(analysis.language);
   const deadlineDate = analysis.deadline.date;
 
   useEffect(() => {
@@ -37,32 +40,32 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
           >
             {analysis.documentType}
           </h2>
-          <RiskBadge level={analysis.risk.level} />
+          <RiskBadge level={analysis.risk.level} language={analysis.language} />
         </div>
         <p className={`risk-${analysis.risk.level} rounded-2xl p-4`}>{analysis.risk.reason}</p>
 
         <div>
-          <h3 lang="en" className="card-title">
+          <h3 className="card-title">
             <span className="icon-chip">
               <Icon name="file" />
             </span>
-            Summary
+            {labels.summary}
           </h3>
           <p className="mt-3 max-w-4xl text-lg leading-relaxed">{analysis.summary}</p>
         </div>
 
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="tile">
-            <dt lang="en" className="flex items-center gap-2 text-sm font-bold text-primary-ink">
+            <dt className="flex items-center gap-2 text-sm font-bold text-primary-ink">
               <Icon name="user" className="size-4" />
-              Who sent it
+              {labels.whoSentIt}
             </dt>
             <dd className="mt-1 font-semibold">{analysis.sender}</dd>
           </div>
           <div className="tile">
-            <dt lang="en" className="flex items-center gap-2 text-sm font-bold text-primary-ink">
+            <dt className="flex items-center gap-2 text-sm font-bold text-primary-ink">
               <Icon name="target" className="size-4" />
-              What they want from you
+              {labels.whatTheyWant}
             </dt>
             <dd className="mt-1 font-semibold">{analysis.whatTheyWant}</dd>
           </div>
@@ -75,22 +78,23 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
           )}
           lang={language.bcp47}
           languageName={language.label}
+          language={analysis.language}
         />
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <DeadlineBadge analysis={analysis} />
-        <ActionChecklist steps={analysis.actionSteps} />
+        <ActionChecklist steps={analysis.actionSteps} language={analysis.language} />
       </div>
 
       <div className="grid items-start gap-6 md:grid-cols-2">
         {analysis.keyFacts.length > 0 && (
           <section aria-labelledby="facts-heading" className="card">
-            <h3 id="facts-heading" lang="en" className="card-title">
+            <h3 id="facts-heading" className="card-title">
               <span className="icon-chip">
                 <Icon name="list" />
               </span>
-              Key facts
+              {labels.keyFacts}
             </h3>
             <dl className="mt-4 space-y-3">
               {analysis.keyFacts.map((fact, index) => (
@@ -110,11 +114,11 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
 
         {analysis.questionsToAsk.length > 0 && (
           <section aria-labelledby="questions-heading" className="card">
-            <h3 id="questions-heading" lang="en" className="card-title">
+            <h3 id="questions-heading" className="card-title">
               <span className="icon-chip">
                 <Icon name="help" />
               </span>
-              Questions you can ask the sender
+              {labels.questions}
             </h3>
             <ul className="mt-4 list-disc space-y-2 pl-6 marker:text-primary">
               {analysis.questionsToAsk.map((question) => (
@@ -127,13 +131,9 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
 
       <FollowUpChat analysis={analysis} />
 
-      <p
-        lang="en"
-        className="tile flex items-start gap-3 border-2 border-edge-soft font-semibold text-muted"
-      >
+      <p className="tile flex items-start gap-3 border-2 border-edge-soft font-semibold text-muted">
         <Icon name="info" className="mt-1 size-5 shrink-0" />
-        This is a simple explanation, not legal or financial advice. For decisions, contact the
-        office that sent the document or a qualified professional.
+        {labels.disclaimer}
       </p>
     </section>
   );

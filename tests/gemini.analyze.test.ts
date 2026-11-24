@@ -48,6 +48,54 @@ describe('analyzeDocument', () => {
   });
 });
 
+describe('analyzeDocument script check', () => {
+  // Malayalam letters inside a Tamil sentence: the glitch a small model can produce.
+  const mixed = { ...validModelOutput, summary: 'தயவுசெய்து செலുത്തவும்' };
+  const clean = { ...validModelOutput, summary: 'தயவுசெய்து செலுத்தவும்' };
+
+  it('asks the model again, more strictly, when letters from another script slip in', async () => {
+    generateMock
+      .mockResolvedValueOnce(JSON.stringify(mixed))
+      .mockResolvedValueOnce(JSON.stringify(clean));
+    const result = await analyzeDocument({ text: 'notice', language: 'ta' });
+    expect(result.summary).toBe(clean.summary);
+    expect(generateMock).toHaveBeenCalledTimes(2);
+    expect(generateMock.mock.calls[0]?.[0].systemInstruction).not.toContain('different script');
+    expect(generateMock.mock.calls[1]?.[0].systemInstruction).toContain('different script');
+  });
+
+  it('keeps the answer rather than failing when the second try is still mixed', async () => {
+    generateMock.mockResolvedValue(JSON.stringify(mixed));
+    const result = await analyzeDocument({ text: 'notice', language: 'ta' });
+    expect(result.summary).toBe(mixed.summary);
+    expect(generateMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses the mixed answer if the retry is not valid JSON', async () => {
+    generateMock.mockResolvedValueOnce(JSON.stringify(mixed)).mockResolvedValueOnce('not json');
+    const result = await analyzeDocument({ text: 'notice', language: 'ta' });
+    expect(result.summary).toBe(mixed.summary);
+  });
+
+  it('does not ask twice for clean answers', async () => {
+    generateMock.mockResolvedValue(JSON.stringify(clean));
+    await analyzeDocument({ text: 'notice', language: 'ta' });
+    expect(generateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('never retries English, even if the document had names in another script', async () => {
+    generateMock.mockResolvedValue(JSON.stringify({ ...validModelOutput, sender: 'राम कुमार' }));
+    await analyzeDocument({ text: 'notice', language: 'en' });
+    expect(generateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('tells the model up front to use only the chosen script', async () => {
+    generateMock.mockResolvedValue(JSON.stringify(clean));
+    await analyzeDocument({ text: 'notice', language: 'ta' });
+    expect(generateMock.mock.calls[0]?.[0].systemInstruction).toContain('only the Tamil script');
+  });
+});
+
 describe('finalizeAnalysis', () => {
   it('adds metadata, masks reference numbers and hides echoed identifiers', () => {
     const result = finalizeAnalysis(
@@ -87,5 +135,24 @@ describe('answerQuestion', () => {
     expect(sent).not.toContain('9876543210');
     expect(sent).toContain('[PAN]');
     expect(sent).toContain('[PHONE]');
+  });
+
+  it('asks again when the answer mixes in letters from another script', async () => {
+    generateMock.mockResolvedValueOnce('செலുത്തவும்').mockResolvedValueOnce('செலுத்தவும்');
+    const answer = await answerQuestion({
+      context: 'Summary',
+      history: [],
+      question: 'என்ன செய்ய வேண்டும்?',
+      language: 'ta',
+    });
+    expect(answer).toBe('செலுத்தவும்');
+    expect(generateMock).toHaveBeenCalledTimes(2);
+    expect(generateMock.mock.calls[1]?.[0].systemInstruction).toContain('different script');
+  });
+
+  it('answers once when the reply is clean', async () => {
+    generateMock.mockResolvedValue('செலுத்தவும்');
+    await answerQuestion({ context: 'Summary', history: [], question: 'எப்படி?', language: 'ta' });
+    expect(generateMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -2,10 +2,21 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/Icon';
+import { getLabels } from '@/lib/labels';
+import { DEFAULT_LANGUAGE, type LanguageCode } from '@/lib/languages';
+
+interface ActionChecklistProps {
+  steps: readonly string[];
+  language?: LanguageCode;
+}
 
 /** Step-by-step checklist. Ticking a step is remembered only while the page is open. */
-export function ActionChecklist({ steps }: { steps: readonly string[] }): React.ReactElement {
+export function ActionChecklist({
+  steps,
+  language = DEFAULT_LANGUAGE,
+}: ActionChecklistProps): React.ReactElement {
   const [done, setDone] = useState<ReadonlySet<number>>(new Set());
+  const labels = getLabels(language);
 
   const toggle = (index: number): void =>
     setDone((previous) => {
@@ -19,11 +30,11 @@ export function ActionChecklist({ steps }: { steps: readonly string[] }): React.
 
   return (
     <section aria-labelledby="steps-heading" className="card">
-      <h3 id="steps-heading" lang="en" className="card-title">
+      <h3 id="steps-heading" className="card-title">
         <span className="icon-chip">
           <Icon name="checks" />
         </span>
-        What to do
+        {labels.whatToDo}
       </h3>
       <ol className="mt-4 list-decimal space-y-3 pl-8 font-extrabold marker:font-extrabold marker:text-primary">
         {steps.map((step, index) => (
@@ -56,8 +67,8 @@ export function ActionChecklist({ steps }: { steps: readonly string[] }): React.
             style={{ width: `${percent}%` }}
           />
         </div>
-        <p lang="en" className="text-sm font-semibold text-muted" aria-live="polite">
-          {done.size} of {steps.length} done
+        <p className="text-sm font-semibold text-muted" aria-live="polite">
+          {labels.doneOf(done.size, steps.length)}
         </p>
       </div>
     </section>

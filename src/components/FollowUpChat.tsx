@@ -5,11 +5,13 @@ import { Icon } from '@/components/Icon';
 import { buildChatContext } from '@/lib/analysisText';
 import { messageFromError, requestFollowUp } from '@/lib/client/api';
 import { MAX_CHAT_HISTORY, MAX_QUESTION_CHARS } from '@/lib/constants';
+import { getLabels } from '@/lib/labels';
 import { getLanguage } from '@/lib/languages';
 import type { Analysis, ChatMessage } from '@/types';
 
 /** Lets the person ask questions about this one document. Answers come only from its summary. */
 export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactElement {
+  const labels = getLabels(analysis.language);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState('');
   const [pending, setPending] = useState(false);
@@ -56,15 +58,13 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
 
   return (
     <section aria-labelledby="chat-heading" className="card">
-      <h3 id="chat-heading" lang="en" className="card-title">
+      <h3 id="chat-heading" className="card-title">
         <span className="icon-chip">
           <Icon name="chat" />
         </span>
-        Ask a follow-up
+        {labels.followUp}
       </h3>
-      <p lang="en" className="mt-2 text-muted">
-        Ask about this document only. If the answer is not in it, we will say so.
-      </p>
+      <p className="mt-2 text-muted">{labels.followUpHint}</p>
 
       <div role="log" aria-live="polite" aria-label="Conversation" className="mt-4 space-y-3">
         {messages.map((message, index) => (
@@ -77,22 +77,18 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
                 : 'w-fit max-w-[90%] rounded-2xl rounded-bl-md border border-edge-soft bg-bg px-4 py-3'
             }
           >
-            <span lang="en" className="sr-only">
-              {message.role === 'user' ? 'You asked: ' : 'Answer: '}
+            <span className="sr-only">
+              {message.role === 'user' ? labels.youAsked : labels.answer}
             </span>
             {message.content}
           </p>
         ))}
-        {pending && (
-          <p lang="en" className="animate-pulse text-muted">
-            Thinking…
-          </p>
-        )}
+        {pending && <p className="animate-pulse text-muted">{labels.thinking}</p>}
       </div>
 
       <form onSubmit={ask} className="mt-4 space-y-3">
-        <label htmlFor="follow-up" lang="en" className="block font-semibold">
-          Your question
+        <label htmlFor="follow-up" className="block font-semibold">
+          {labels.yourQuestion}
         </label>
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
@@ -107,12 +103,11 @@ export function FollowUpChat({ analysis }: { analysis: Analysis }): React.ReactE
           />
           <button
             type="submit"
-            lang="en"
             className="btn btn-primary px-6"
             disabled={pending || !question.trim()}
           >
             <Icon name="send" className="size-4" />
-            Ask
+            {labels.ask}
           </button>
         </div>
         {error && (

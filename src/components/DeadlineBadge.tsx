@@ -5,30 +5,30 @@ import { buildDeadlineEvent } from '@/lib/analysisText';
 import { buildGoogleCalendarUrl, buildIcs } from '@/lib/calendar';
 import { downloadTextFile } from '@/lib/client/download';
 import { daysUntil, formatIsoDate } from '@/lib/dates';
+import { describeDays, getLabels } from '@/lib/labels';
+import { DEFAULT_LANGUAGE, type LanguageCode } from '@/lib/languages';
 import type { Analysis } from '@/types';
 
-/** Short phrase such as "in 8 days", "today" or "3 days ago". */
-export function describeDaysLeft(days: number): string {
-  if (days === 0) return 'today';
-  if (days === 1) return 'tomorrow';
-  if (days === -1) return 'yesterday';
-  return days > 0 ? `in ${days} days` : `${-days} days ago`;
+/** Short phrase such as "in 8 days", "today" or "3 days ago", in the given language. */
+export function describeDaysLeft(days: number, language: LanguageCode = DEFAULT_LANGUAGE): string {
+  return describeDays(days, getLabels(language));
 }
 
 /** The deadline card: date, what happens if missed, and calendar helpers. */
 export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.ReactElement {
   const { date, consequenceIfMissed } = analysis.deadline;
+  const labels = getLabels(analysis.language);
   const event = buildDeadlineEvent(analysis);
   const days = date ? daysUntil(date) : null;
   const urgent = days !== null && days <= 3;
 
   return (
     <section aria-labelledby="deadline-heading" className="card">
-      <h3 id="deadline-heading" lang="en" className="card-title">
+      <h3 id="deadline-heading" className="card-title">
         <span className="icon-chip">
           <Icon name="calendar" />
         </span>
-        Deadline
+        {labels.deadline}
       </h3>
       {date && days !== null && event ? (
         <>
@@ -40,21 +40,20 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
             {formatIsoDate(date, analysis.language)}
           </p>
           <p
-            lang="en"
             className={
               urgent
                 ? 'risk-high mt-2 inline-block rounded-full px-3 py-0.5 font-bold'
                 : 'mt-1 font-semibold text-muted'
             }
           >
-            {days < 0 ? 'This date has passed: ' : urgent ? 'Soon: ' : ''}
-            {describeDaysLeft(days)}
+            {days < 0 ? labels.passed : urgent ? labels.soon : ''}
+            {describeDays(days, labels)}
           </p>
           <p className="tile mt-4">
-            <strong lang="en">If you miss it: </strong>
+            <strong>{labels.ifYouMissIt}</strong>
             {consequenceIfMissed}
           </p>
-          <div className="mt-4 flex flex-wrap gap-3" lang="en">
+          <div className="mt-4 flex flex-wrap gap-3">
             <a
               className="btn btn-primary"
               href={buildGoogleCalendarUrl(event)}
@@ -62,7 +61,8 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
               rel="noopener noreferrer"
             >
               <Icon name="calendar" />
-              Add to Google Calendar<span className="sr-only"> (opens in a new tab)</span>
+              {labels.addToCalendar}
+              <span className="sr-only">{labels.opensNewTab}</span>
             </a>
             <button
               type="button"
@@ -72,13 +72,13 @@ export function DeadlineBadge({ analysis }: { analysis: Analysis }): React.React
               }
             >
               <Icon name="download" />
-              Download .ics file
+              {labels.downloadIcs}
             </button>
           </div>
         </>
       ) : (
         <p className="mt-3">
-          <span lang="en">No deadline was found in this document. </span>
+          {labels.noDeadline}
           {consequenceIfMissed}
         </p>
       )}

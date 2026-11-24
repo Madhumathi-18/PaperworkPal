@@ -5,7 +5,8 @@ import { maskSensitiveValue, redactPii } from '@/lib/security/redact';
 import type { ValidatedUpload } from '@/lib/security/validate';
 import type { Analysis, ModelAnalysis } from '@/types';
 import { generate } from './client';
-import { buildAnalysisContents, buildAnalysisSystemPrompt } from './prompts';
+import { hasForeignScript } from '@/lib/scripts';
+import { buildAnalysisContents, buildAnalysisSystemPrompt, buildScriptRetryNote } from './prompts';
 import { modelAnalysisSchema, toGeminiSchema } from './schema';
 
 export interface AnalyzeInput {
@@ -26,9 +27,25 @@ function parseModelOutput(raw: string): ModelAnalysis | null {
   }
 }
 
+/** Every piece of text in the output, joined, so it can be checked as one string. */
+function allText(output: ModelAnalysis): string {
+  return [
+    output.documentType,
+    output.summary,
+    output.sender,
+    output.whatTheyWant,
+    ...output.keyFacts.flatMap((fact) => [fact.label, fact.value]),
+    output.deadline.consequenceIfMissed,
+    ...output.actionSteps,
+    output.risk.reason,
+    ...output.questionsToAsk,
+  ].join('\n');
+}
+
 /**
- * Asks Gemini to explain a document and returns validated output. If the answer is not
- * valid JSON in the expected shape, it asks once more before giving up.
+ * Asks Gemini to explain a document and returns validated output. If the answer is not valid
+ * JSON in the expected shape, or it mixes in letters from another script (a known problem with
+ * small models and Indian languages), it asks once more before giving up.
  */
 export async function analyzeDocument(input: AnalyzeInput): Promise<ModelAnalysis> {
   const request = {
@@ -44,10 +61,21 @@ export async function analyzeDocument(input: AnalyzeInput): Promise<ModelAnalysi
     responseSchema,
   };
 
+  // A valid answer with stray letters is kept as a fallback: it is better than an error.
+  let mixedScript: ModelAnalysis | null = null;
   for (let attempt = 0; attempt < ANALYSIS_PARSE_ATTEMPTS; attempt += 1) {
-    const parsed = parseModelOutput(await generate(request));
-    if (parsed) return parsed;
+    const retry = mixedScript
+      ? {
+          ...request,
+          systemInstruction: request.systemInstruction + buildScriptRetryNote(input.language),
+        }
+      : request;
+    const parsed = parseModelOutput(await generate(retry));
+    if (!parsed) continue;
+    if (!hasForeignScript(allText(parsed), input.language)) return parsed;
+    mixedScript = parsed;
   }
+  if (mixedScript) return mixedScript;
   throw new AppError(
     'ai_bad_response',
     'We could not understand the AI answer this time. Please try again or use a clearer copy.',
