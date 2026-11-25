@@ -14,7 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Stage 3: minimal runtime image, runs as a non-root user and listens on $PORT (Cloud Run sets it)
+# Stage 3: minimal runtime image, runs as a non-root user and listens on $PORT (most container hosts set it)
 FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
@@ -28,5 +28,5 @@ USER app
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
   CMD wget -qO- "http://127.0.0.1:${PORT}/api/health" || exit 1
-# GEMINI_API_KEY is injected at deploy time (Secret Manager or an env var), never baked into the image.
+# GEMINI_API_KEY is injected at deploy time as an environment variable, never baked into the image.
 CMD ["node", "server.js"]
