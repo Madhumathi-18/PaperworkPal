@@ -76,8 +76,13 @@ export function DocumentInput({
 
   return (
     <form onSubmit={submit} className="card space-y-6" noValidate>
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
-        <section aria-labelledby="upload-heading" className="flex flex-col">
+      {/* On wide screens both sections share the same rows (title, label, box, caption),
+          so the boxes and their captions line up at any text size. */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-0">
+        <section
+          aria-labelledby="upload-heading"
+          className="lg:row-span-4 lg:grid lg:grid-rows-subgrid"
+        >
           <h2 id="upload-heading" className="card-title">
             <span className="icon-chip">
               <Icon name="upload" />
@@ -85,15 +90,16 @@ export function DocumentInput({
             Upload or take a photo
           </h2>
           <label htmlFor="file" className="mt-2 block text-muted">
-            Photo or PDF of your letter (JPG, PNG, WEBP or PDF, up to {DEFAULT_MAX_UPLOAD_MB} MB)
+            Photo or PDF of your letter
           </label>
-          <div className="dropzone mt-3 flex-1">
+          <div className="dropzone mt-2 h-64">
             <input
               ref={fileInput}
               id="file"
               type="file"
               accept={FILE_TYPES}
               disabled={loading}
+              aria-describedby="file-hint"
               title="Choose a photo or PDF"
               onChange={(event) => chooseFile(event.target.files?.[0])}
               className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
@@ -108,36 +114,17 @@ export function DocumentInput({
               <span className="text-sm text-muted">or drag and drop it here</span>
             </div>
           </div>
-          {file && (
-            <div className="mt-3 space-y-3">
-              <p className="tile flex flex-wrap items-center justify-between gap-3">
-                <span>
-                  Selected: <strong>{file.name}</strong>
-                </span>
-                <button type="button" className="btn btn-secondary" onClick={removeFile}>
-                  <Icon name="trash" className="size-4" />
-                  Remove file
-                </button>
-              </p>
-              <label className="flex min-h-11 items-start gap-3">
-                <input
-                  type="checkbox"
-                  className="mt-1 size-6 shrink-0"
-                  checked={consent}
-                  onChange={(event) => setConsent(event.target.checked)}
-                />
-                <span>
-                  I understand this file is sent to Google&apos;s Gemini AI, and personal details in
-                  it cannot be hidden automatically.
-                </span>
-              </label>
-            </div>
-          )}
+          <p id="file-hint" className="mt-2 flex min-h-11 items-center text-sm text-muted">
+            JPG, PNG, WEBP or PDF, up to {DEFAULT_MAX_UPLOAD_MB} MB
+          </p>
         </section>
 
         <hr className="border-edge-soft lg:hidden" />
 
-        <section aria-labelledby="paste-heading">
+        <section
+          aria-labelledby="paste-heading"
+          className="lg:row-span-4 lg:grid lg:grid-rows-subgrid"
+        >
           <h2 id="paste-heading" className="card-title">
             <span className="icon-chip">
               <Icon name="text" />
@@ -149,7 +136,7 @@ export function DocumentInput({
           </label>
           <textarea
             id="document-text"
-            className="field mt-2 min-h-48"
+            className="field mt-2 h-64 resize-none"
             rows={8}
             maxLength={MAX_TEXT_CHARS}
             value={text}
@@ -157,11 +144,11 @@ export function DocumentInput({
             aria-describedby="text-count"
             onChange={(event) => changeText(event.target.value)}
           />
-          <p id="text-count" className="mt-2 text-sm text-muted">
-            {text.length.toLocaleString('en-IN')} of {MAX_TEXT_CHARS.toLocaleString('en-IN')}{' '}
-            characters
-          </p>
-          <div className="mt-3">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <p id="text-count" className="text-sm text-muted">
+              {text.length.toLocaleString('en-IN')} of {MAX_TEXT_CHARS.toLocaleString('en-IN')}{' '}
+              characters
+            </p>
             <VoiceInputButton
               lang={getLanguage(language).bcp47}
               onText={(spoken) =>
@@ -171,6 +158,32 @@ export function DocumentInput({
           </div>
         </section>
       </div>
+
+      {file && (
+        <div className="space-y-3">
+          <p className="tile flex flex-wrap items-center justify-between gap-3">
+            <span>
+              Selected: <strong>{file.name}</strong>
+            </span>
+            <button type="button" className="btn btn-secondary" onClick={removeFile}>
+              <Icon name="trash" className="size-4" />
+              Remove file
+            </button>
+          </p>
+          <label className="flex min-h-11 items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 size-6 shrink-0"
+              checked={consent}
+              onChange={(event) => setConsent(event.target.checked)}
+            />
+            <span>
+              I understand this file is sent to Google&apos;s Gemini AI, and personal details in it
+              cannot be hidden automatically.
+            </span>
+          </label>
+        </div>
+      )}
 
       {problem && (
         <p className="flex items-start gap-2 rounded-xl border-2 border-danger bg-danger-bg p-3 font-semibold text-danger">
@@ -186,17 +199,17 @@ export function DocumentInput({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col items-start gap-3">
         <button
           type="submit"
-          className="btn btn-primary w-full px-6 text-lg sm:w-auto"
+          className="btn btn-primary min-h-14 px-6 text-lg sm:px-8"
           disabled={loading}
         >
           <Icon name="file" />
           Explain my document
         </button>
         {loading && (
-          <>
+          <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-2" aria-hidden="true">
               <span className="size-5 animate-spin rounded-full border-4 border-edge border-t-primary" />
               Analyzing… this can take up to 30 seconds.
@@ -204,7 +217,7 @@ export function DocumentInput({
             <button type="button" className="btn btn-secondary" onClick={onCancel}>
               Cancel
             </button>
-          </>
+          </div>
         )}
       </div>
     </form>
