@@ -31,19 +31,38 @@ export function DocumentInput({
   const [file, setFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
   const [problem, setProblem] = useState('');
+  const [notice, setNotice] = useState('');
 
+  // Only one document is explained at a time, and whatever the person added last wins.
+  // Otherwise old pasted text could ride along with a new file and be explained instead of it.
   const chooseFile = (chosen: File | undefined): void => {
     const message = chosen ? checkFile(chosen) : null;
+    const accepted = chosen && !message ? chosen : null;
     setProblem(message ?? '');
     setConsent(false);
-    setFile(chosen && !message ? chosen : null);
+    setFile(accepted);
     if (message && fileInput.current) fileInput.current.value = '';
+    if (accepted && text.trim()) {
+      setText('');
+      setNotice('The pasted text was cleared, so only your file will be explained.');
+    } else {
+      setNotice('');
+    }
   };
 
   const removeFile = (): void => {
     setFile(null);
     setConsent(false);
+    setNotice('');
     if (fileInput.current) fileInput.current.value = '';
+  };
+
+  /** Typing, pasting or dictating text replaces a chosen file. */
+  const changeText = (update: SetStateAction<string>): void => {
+    setText(update);
+    if (!file) return;
+    removeFile();
+    setNotice('Your file was removed, so only the text will be explained.');
   };
 
   const submit = (event: FormEvent): void => {
@@ -52,7 +71,7 @@ export function DocumentInput({
     if (!file && !trimmed) return setProblem('Please paste some text or choose a file first.');
     if (file && !consent) return setProblem('Please tick the box to agree before sending a file.');
     setProblem('');
-    onSubmit({ file: file ?? undefined, text: trimmed || undefined });
+    onSubmit(file ? { file, text: undefined } : { file: undefined, text: trimmed });
   };
 
   return (
@@ -124,7 +143,7 @@ export function DocumentInput({
             value={text}
             disabled={loading}
             aria-describedby="text-count"
-            onChange={(event) => setText(event.target.value)}
+            onChange={(event) => changeText(event.target.value)}
           />
           <p id="text-count" className="mt-2 text-sm text-muted">
             {text.length.toLocaleString('en-IN')} of {MAX_TEXT_CHARS.toLocaleString('en-IN')}{' '}
@@ -134,7 +153,7 @@ export function DocumentInput({
             <VoiceInputButton
               lang={getLanguage(language).bcp47}
               onText={(spoken) =>
-                setText((previous) => (previous ? `${previous} ${spoken}` : spoken))
+                changeText((previous) => (previous ? `${previous} ${spoken}` : spoken))
               }
             />
           </div>
@@ -145,6 +164,13 @@ export function DocumentInput({
         <p className="flex items-start gap-2 rounded-xl border-2 border-danger bg-danger-bg p-3 font-semibold text-danger">
           <Icon name="info" className="mt-1 size-5 shrink-0" />
           {problem}
+        </p>
+      )}
+
+      {notice && (
+        <p role="status" className="tile flex items-start gap-2 font-semibold">
+          <Icon name="info" className="mt-1 size-5 shrink-0 text-primary-ink" />
+          {notice}
         </p>
       )}
 

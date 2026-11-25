@@ -46,6 +46,75 @@ describe('main flow with a mocked server', () => {
     expect(screen.getByLabelText('Text of your letter')).toHaveValue(String(body.get('text')));
   });
 
+  describe('one document at a time', () => {
+    const pdf = (): File => new File(['%PDF-1.4'], 'letter.pdf', { type: 'application/pdf' });
+    const sentForm = (fetchMock: ReturnType<typeof vi.fn>, call: number): FormData =>
+      (fetchMock.mock.calls[call]?.[1] as RequestInit).body as FormData;
+
+    it('explains the uploaded file, not an earlier sample, when a file is chosen afterwards', async () => {
+      const fetchMock = mockServer();
+      const user = userEvent.setup();
+      render(<PaperworkApp />);
+
+      await user.click(screen.getByRole('button', { name: /Income tax notice/ }));
+      await screen.findByRole('heading', { name: 'Income Tax Notice' });
+
+      await user.upload(screen.getByLabelText(/Photo or PDF of your letter/), pdf());
+      expect(screen.getByLabelText('Text of your letter')).toHaveValue('');
+      expect(screen.getByText(/pasted text was cleared/i)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('checkbox', { name: /I understand this file is sent/ }));
+      await user.click(screen.getByRole('button', { name: 'Explain my document' }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+      const form = sentForm(fetchMock, 1);
+      expect(form.get('file')).toBeInstanceOf(File);
+      expect(form.get('text')).toBeNull();
+    });
+
+    it('drops a chosen file when the person types text instead', async () => {
+      const fetchMock = mockServer();
+      const user = userEvent.setup();
+      render(<PaperworkApp />);
+
+      await user.upload(screen.getByLabelText(/Photo or PDF of your letter/), pdf());
+      expect(screen.getByText(/letter\.pdf/)).toBeInTheDocument();
+      await user.type(screen.getByLabelText('Text of your letter'), 'Pay the fee');
+      expect(screen.queryByText(/letter\.pdf/)).toBeNull();
+      expect(screen.getByText(/file was removed/i)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Explain my document' }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+      const form = sentForm(fetchMock, 0);
+      expect(form.get('file')).toBeNull();
+      expect(form.get('text')).toBe('Pay the fee');
+    });
+
+    it('drops a chosen file when a sample is clicked, so only the sample is explained', async () => {
+      const fetchMock = mockServer();
+      const user = userEvent.setup();
+      render(<PaperworkApp />);
+
+      await user.upload(screen.getByLabelText(/Photo or PDF of your letter/), pdf());
+      await user.click(screen.getByRole('button', { name: /Bank loan reminder/ }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+      expect(screen.queryByText(/letter\.pdf/)).toBeNull();
+      const form = sentForm(fetchMock, 0);
+      expect(form.get('file')).toBeNull();
+      expect(String(form.get('text'))).toContain('SAMPLE DOCUMENT (FAKE)');
+    });
+
+    it('keeps typed text when no file is chosen', async () => {
+      mockServer();
+      const user = userEvent.setup();
+      render(<PaperworkApp />);
+      await user.type(screen.getByLabelText('Text of your letter'), 'Pay the fee');
+      expect(screen.getByLabelText('Text of your letter')).toHaveValue('Pay the fee');
+      expect(screen.queryByText(/was cleared|was removed/i)).toBeNull();
+    });
+  });
+
   it('sends the selected language', async () => {
     const fetchMock = mockServer();
     const user = userEvent.setup();

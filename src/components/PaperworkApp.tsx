@@ -49,6 +49,8 @@ export function announcementFor(state: FlowState): string {
 export function PaperworkApp(): React.ReactElement {
   const [language, setLanguage] = useState<LanguageCode>(DEFAULT_LANGUAGE);
   const [text, setText] = useState('');
+  // Changing this key gives the form a fresh start, which drops any file chosen earlier.
+  const [formKey, setFormKey] = useState(0);
   const { state, run, cancel } = useAnalysisFlow();
   const loading = state.status === 'loading';
 
@@ -61,6 +63,7 @@ export function PaperworkApp(): React.ReactElement {
       <LanguageSelect value={language} onChange={setLanguage} disabled={loading} />
 
       <DocumentInput
+        key={formKey}
         language={language}
         text={text}
         setText={setText}
@@ -73,6 +76,7 @@ export function PaperworkApp(): React.ReactElement {
         disabled={loading}
         onSelect={(sample) => {
           setText(sample);
+          setFormKey((key) => key + 1);
           void run({ text: sample, language });
         }}
       />
