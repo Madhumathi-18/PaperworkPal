@@ -47,6 +47,22 @@ describe('chunkText', () => {
     expect(chunks.map((chunk) => chunk.length)).toEqual([100, 100, 50]);
   });
 
+  it('cuts a long sentence at spaces, so no word is split', () => {
+    const text = Array.from({ length: 30 }, () => 'கட்டணத்தை செலுத்தவும்').join(' ');
+    const chunks = chunkText(text, 60);
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.every((chunk) => chunk.length <= 60)).toBe(true);
+    expect(chunks.join(' ')).toBe(text);
+  });
+
+  it('never leaves a vowel sign alone at the start of a piece', () => {
+    // No spaces at all, so the cut must back off rather than split a letter from its sign.
+    const chunks = chunkText('கா'.repeat(100), 99);
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.every((chunk) => !/^\p{M}/u.test(chunk))).toBe(true);
+    expect(chunks.join('')).toBe('கா'.repeat(100));
+  });
+
   it('returns nothing for blank text', () => {
     expect(chunkText('   ')).toEqual([]);
   });

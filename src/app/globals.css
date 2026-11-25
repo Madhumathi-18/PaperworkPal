@@ -199,6 +199,20 @@ input[type='checkbox'] {
   html[data-contrast='high'] .field {
     @apply border-edge;
   }
+  /* A big, friendly target for the real file input, which sits invisibly on top of it. */
+  .dropzone {
+    @apply relative grid min-h-40 place-items-center rounded-2xl border-2 border-dashed border-edge bg-primary-soft p-6 text-center transition-colors;
+  }
+  .dropzone:hover:not(:has(:disabled)) {
+    @apply border-primary;
+  }
+  .dropzone:has(:focus-visible) {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .dropzone:has(:disabled) {
+    @apply opacity-60;
+  }
   .hero {
     @apply rounded-3xl border border-edge-soft p-6 shadow-card sm:p-10;
     background: linear-gradient(135deg, var(--hero-from), var(--hero-via) 55%, var(--hero-to));

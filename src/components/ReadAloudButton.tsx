@@ -58,9 +58,16 @@ export function ReadAloudButton({
         )}
       </div>
       {missingVoice && (
-        <p lang="en" className="text-sm text-muted">
-          Your device has no {languageName} voice installed, so it may sound unclear. You can add
-          one in your device&apos;s speech settings.
+        <p
+          lang="en"
+          className="tile flex items-start gap-2 border-2 border-edge-soft text-sm font-semibold"
+        >
+          <Icon name="info" className="mt-0.5 size-5 shrink-0 text-primary-ink" />
+          <span>
+            This browser has no {languageName} voice installed, so read aloud will sound wrong. Try
+            Microsoft Edge, which has free {languageName} voices, or Chrome on an Android phone. You
+            can also add a voice in your device&apos;s speech settings.
+          </span>
         </p>
       )}
     </div>

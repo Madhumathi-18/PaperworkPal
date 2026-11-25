@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DocumentInput } from '@/components/DocumentInput';
 import { Icon } from '@/components/Icon';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { SampleDocuments } from '@/components/SampleDocuments';
 import { useAnalysisFlow, type FlowState } from '@/hooks/useAnalysisFlow';
+import { revealElement } from '@/lib/client/reveal';
 import { DEFAULT_LANGUAGE, type LanguageCode } from '@/lib/languages';
 
 /** Grey placeholder shapes shown while Gemini works. Hidden from screen readers (the live region speaks). */
@@ -53,6 +54,14 @@ export function PaperworkApp(): React.ReactElement {
   const [formKey, setFormKey] = useState(0);
   const { state, run, cancel } = useAnalysisFlow();
   const loading = state.status === 'loading';
+  const failed = state.status === 'error';
+  // The loading placeholder and any error sit below the form, so bring them into view.
+  // (A finished result takes focus itself, which scrolls to it.)
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (loading || failed) revealElement(progressRef.current);
+  }, [loading, failed]);
 
   return (
     <div className="space-y-8">
@@ -81,17 +90,23 @@ export function PaperworkApp(): React.ReactElement {
         }}
       />
 
-      {loading && <LoadingSkeleton />}
+      {(loading || state.status === 'error') && (
+        <div ref={progressRef}>
+          {loading && <LoadingSkeleton />}
 
-      {state.status === 'error' && (
-        <div className="card flex items-start gap-4 border-2 border-danger bg-danger-bg">
-          <span className="icon-chip">
-            <Icon name="info" />
-          </span>
-          <div>
-            <h2 className="text-xl font-bold text-danger">We could not explain this document</h2>
-            <p className="mt-1">{state.message}</p>
-          </div>
+          {state.status === 'error' && (
+            <div className="card flex items-start gap-4 border-2 border-danger bg-danger-bg">
+              <span className="icon-chip">
+                <Icon name="info" />
+              </span>
+              <div>
+                <h2 className="text-xl font-bold text-danger">
+                  We could not explain this document
+                </h2>
+                <p className="mt-1">{state.message}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -19,6 +19,27 @@ export function pickVoice(
 }
 
 /**
+ * Cuts one over-long sentence into pieces of at most `maxChars`, preferably at a space so no
+ * word is split. If there is no space, it still never separates a letter from the vowel sign
+ * or mark that follows it, which would change how the word sounds (common in Indian scripts).
+ */
+function splitLongSentence(sentence: string, maxChars: number): string[] {
+  const pieces: string[] = [];
+  let rest = sentence.trim();
+  while (rest.length > maxChars) {
+    let cut = rest.lastIndexOf(' ', maxChars);
+    if (cut <= 0) {
+      cut = maxChars;
+      while (cut > 1 && /\p{M}/u.test(rest.charAt(cut))) cut -= 1;
+    }
+    pieces.push(rest.slice(0, cut).trim());
+    rest = rest.slice(cut).trim();
+  }
+  if (rest) pieces.push(rest);
+  return pieces;
+}
+
+/**
  * Splits text into sentence-sized pieces. Some browsers silently stop long utterances,
  * so we speak a queue of short ones instead.
  */
@@ -37,9 +58,7 @@ export function chunkText(text: string, maxChars: number = MAX_CHUNK_CHARS): str
   for (const sentence of sentences) {
     if (sentence.length > maxChars) {
       flush();
-      for (let start = 0; start < sentence.length; start += maxChars) {
-        chunks.push(sentence.slice(start, start + maxChars).trim());
-      }
+      chunks.push(...splitLongSentence(sentence, maxChars));
     } else if ((current + sentence).length > maxChars) {
       flush();
       current = sentence;

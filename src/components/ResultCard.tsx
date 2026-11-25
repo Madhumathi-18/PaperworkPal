@@ -87,7 +87,7 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
         <ActionChecklist steps={analysis.actionSteps} language={analysis.language} />
       </div>
 
-      <div className="grid items-start gap-6 md:grid-cols-2">
+      <div className="space-y-6">
         {analysis.keyFacts.length > 0 && (
           <section aria-labelledby="facts-heading" className="card">
             <h3 id="facts-heading" className="card-title">
@@ -96,7 +96,7 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
               </span>
               {labels.keyFacts}
             </h3>
-            <dl className="mt-4 space-y-3">
+            <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {analysis.keyFacts.map((fact, index) => (
                 <div key={`${index}-${fact.label}`} className="tile py-3">
                   <dt className="text-sm text-muted">{fact.label}</dt>

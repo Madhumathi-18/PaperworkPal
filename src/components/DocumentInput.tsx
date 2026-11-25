@@ -77,7 +77,7 @@ export function DocumentInput({
   return (
     <form onSubmit={submit} className="card space-y-6" noValidate>
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
-        <section aria-labelledby="upload-heading">
+        <section aria-labelledby="upload-heading" className="flex flex-col">
           <h2 id="upload-heading" className="card-title">
             <span className="icon-chip">
               <Icon name="upload" />
@@ -87,15 +87,27 @@ export function DocumentInput({
           <label htmlFor="file" className="mt-2 block text-muted">
             Photo or PDF of your letter (JPG, PNG, WEBP or PDF, up to {DEFAULT_MAX_UPLOAD_MB} MB)
           </label>
-          <input
-            ref={fileInput}
-            id="file"
-            type="file"
-            accept={FILE_TYPES}
-            disabled={loading}
-            onChange={(event) => chooseFile(event.target.files?.[0])}
-            className="field mt-3 cursor-pointer border-dashed bg-primary-soft py-6 lg:py-16 file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-on-primary hover:file:bg-primary-hover"
-          />
+          <div className="dropzone mt-3 flex-1">
+            <input
+              ref={fileInput}
+              id="file"
+              type="file"
+              accept={FILE_TYPES}
+              disabled={loading}
+              title="Choose a photo or PDF"
+              onChange={(event) => chooseFile(event.target.files?.[0])}
+              className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+            />
+            <div className="pointer-events-none flex flex-col items-center gap-2">
+              <span className="icon-chip size-12 bg-surface shadow-card">
+                <Icon name="upload" />
+              </span>
+              <span className="text-lg font-bold text-primary-ink">
+                {file ? 'Choose a different file' : 'Choose a photo or PDF'}
+              </span>
+              <span className="text-sm text-muted">or drag and drop it here</span>
+            </div>
+          </div>
           {file && (
             <div className="mt-3 space-y-3">
               <p className="tile flex flex-wrap items-center justify-between gap-3">
@@ -175,7 +187,11 @@ export function DocumentInput({
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" className="btn btn-primary px-6 text-lg" disabled={loading}>
+        <button
+          type="submit"
+          className="btn btn-primary w-full px-6 text-lg sm:w-auto"
+          disabled={loading}
+        >
           <Icon name="file" />
           Explain my document
         </button>
