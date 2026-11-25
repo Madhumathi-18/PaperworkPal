@@ -27,6 +27,10 @@ Built for people who struggle with jargon-heavy paperwork because of language, l
 
 ## Chosen vertical, approach and assumptions
 
+### Problem statement
+
+Official letters (tax notices, bank and insurance letters, rental agreements, scheme forms) are written in jargon, often in a language the reader finds hard. People with limited English or literacy, elderly users and people with low vision miss deadlines or take the wrong action, which costs money and opportunities. **The challenge we solve:** build a smart assistant that reads the user's own document and tells them, in their language and in a form they can access, what it is, what to do and by when. See [Problem Statement Alignment](#problem-statement-alignment) for how each challenge expectation is met.
+
 ### Vertical and persona
 
 **Everyday citizen help, with accessibility at the centre:** an assistant that turns official paperwork into something a person can act on. The persona is someone who receives a government, bank, tax, insurance or rental letter and cannot easily read it because of language, literacy, age, low vision or plain stress. They need three answers: _what is this, what must I do, and by when?_
@@ -55,6 +59,19 @@ Pick a language, then upload a photo or PDF, paste text, dictate, or try a sampl
 - A free Gemini API key is enough for demo traffic. Rate limits are per instance and best-effort.
 
 ## How this meets the evaluation criteria
+
+### Problem Statement Alignment
+
+The challenge asks for a solution built around one persona and its logic. Ours is the citizen who cannot easily read an official letter (see [Vertical and persona](#vertical-and-persona)). Each expectation maps to something you can try in the live demo:
+
+| Challenge expectation                       | How Paperwork Pal meets it                                                                                                                                                                                                                                                                                               | Where                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **A smart, dynamic assistant**              | Gemini reads any pasted text, photo or PDF and returns a structured, document-specific answer (type, sender, what they want, key facts, deadline, steps, risk, questions). The result changes with the document, the chosen language and the follow-up questions. Nothing is a fixed template.                           | `src/lib/gemini/`, `src/app/api/analyze`, `src/app/api/chat`           |
+| **Logical decisions based on user context** | The deadline is compared with the date on the user's device ("in 5 days", "yesterday"). A low, medium or high **risk level** with a reason sets the urgency. The checklist is 3 to 7 steps for this document. Follow-up questions are answered only from this document, and the assistant says "I can't tell" otherwise. | `src/lib/labels`, `src/lib/gemini/schema.ts`, `src/lib/gemini/chat.ts` |
+| **Practical, real-world usability**         | Works on a phone: photo upload, dictation, read aloud, 8 Indian languages, a calendar reminder for the deadline, large text and high contrast. Personal numbers are masked before text reaches the AI, and nothing is stored. Three fake sample documents let anyone try it with one click.                              | `src/components/`, `src/lib/security/redact.ts`                        |
+| **Clean and maintainable code**             | Logic lives in `src/lib`, components stay thin, one zod schema validates and describes the AI output, strict TypeScript, ESLint, Prettier, CI and 288 automated tests.                                                                                                                                                   | [Code Quality](#code-quality), [Testing](#testing)                     |
+
+**Scope on purpose:** the app explains documents and does not give legal, tax or financial advice. It always shows that notice, so it stays inside what it can do reliably.
 
 ### Code Quality
 
