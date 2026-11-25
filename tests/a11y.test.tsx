@@ -310,18 +310,51 @@ describe('deadline helpers', () => {
     expect(screen.queryByRole('link', { name: /Calendar/ })).toBeNull();
   });
 
-  it('renders model text as plain text, never as HTML', () => {
+  it('shows what happens if the date is missed in the main card, not in the deadline card', () => {
+    render(<ResultCard analysis={validAnalysis} />);
+    expect(screen.getByText('If you miss it')).toBeInTheDocument();
+    expect(screen.getByText('A penalty may be added.')).toBeInTheDocument();
+    const card = screen.getByRole('region', { name: 'Deadline' });
+    expect(within(card).queryByText(/A penalty may be added/)).toBeNull();
+  });
+
+  it('hides a leftover English "Not mentioned" in another language', () => {
     render(
-      <DeadlineBadge
+      <ResultCard
+        analysis={{
+          ...validAnalysis,
+          language: 'ta',
+          deadline: { date: null, consequenceIfMissed: 'Not mentioned' },
+        }}
+      />,
+    );
+    expect(screen.queryByText(/Not mentioned/)).toBeNull();
+  });
+
+  it('leaves out the "if you miss it" box when the document says nothing about it', () => {
+    render(
+      <ResultCard
+        analysis={{
+          ...validAnalysis,
+          deadline: { date: '2026-12-31', consequenceIfMissed: 'Not mentioned.' },
+        }}
+      />,
+    );
+    expect(screen.queryByText('If you miss it')).toBeNull();
+    expect(screen.getByRole('link', { name: /Add to Google Calendar/ })).toBeInTheDocument();
+  });
+
+  it('renders model text as plain text, never as HTML', () => {
+    const { container } = render(
+      <ResultCard
         analysis={{
           ...validAnalysis,
           deadline: { date: '2026-12-31', consequenceIfMissed: '<img src=x onerror=alert(1)>' },
         }}
       />,
     );
-    const card = screen.getByRole('region', { name: 'Deadline' });
-    expect(card.querySelector('img')).toBeNull();
-    expect(within(card).getByText(/<img src=x/)).toBeInTheDocument();
+    expect(container.querySelector('img')).toBeNull();
+    expect(screen.getByText(/<img src=x/)).toBeInTheDocument();
   });
 });
 

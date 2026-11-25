@@ -7,7 +7,7 @@ import { FollowUpChat } from '@/components/FollowUpChat';
 import { Icon } from '@/components/Icon';
 import { ReadAloudButton } from '@/components/ReadAloudButton';
 import { RiskBadge } from '@/components/RiskBadge';
-import { buildReadAloudText } from '@/lib/analysisText';
+import { buildReadAloudText, consequenceText } from '@/lib/analysisText';
 import { formatIsoDate } from '@/lib/dates';
 import { getLabels } from '@/lib/labels';
 import { getLanguage } from '@/lib/languages';
@@ -23,6 +23,7 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
   const language = getLanguage(analysis.language);
   const labels = getLabels(analysis.language);
   const deadlineDate = analysis.deadline.date;
+  const consequence = consequenceText(analysis);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -69,6 +70,15 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
             </dt>
             <dd className="mt-1 font-semibold">{analysis.whatTheyWant}</dd>
           </div>
+          {consequence && (
+            <div className="tile sm:col-span-2">
+              <dt className="flex items-center gap-2 text-sm font-bold text-primary-ink">
+                <Icon name="info" className="size-4" />
+                {labels.ifYouMissIt.replace(/\s*[:：]\s*$/, '')}
+              </dt>
+              <dd className="mt-1 font-semibold">{consequence}</dd>
+            </div>
+          )}
         </dl>
 
         <ReadAloudButton
@@ -82,7 +92,9 @@ export function ResultCard({ analysis }: { analysis: Analysis }): React.ReactEle
         />
       </div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      {/* Stacked, not side by side: the two cards are rarely the same height, and a short card
+          next to a tall one would be left with a block of empty space. */}
+      <div className="space-y-6">
         <DeadlineBadge analysis={analysis} />
         <ActionChecklist steps={analysis.actionSteps} language={analysis.language} />
       </div>

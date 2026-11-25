@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildChatContext, buildDeadlineEvent, buildReadAloudText } from '@/lib/analysisText';
+import {
+  buildChatContext,
+  buildDeadlineEvent,
+  buildReadAloudText,
+  consequenceText,
+} from '@/lib/analysisText';
 import { ClientError, messageFromError, requestAnalysis, requestFollowUp } from '@/lib/client/api';
 import { checkFile, compressImage, fitWithin } from '@/lib/client/files';
 import { parsePreferences } from '@/lib/client/preferences';
@@ -68,6 +73,17 @@ describe('analysis text builders', () => {
     const text = buildReadAloudText(validAnalysis, '31 December 2026');
     expect(text.indexOf(validAnalysis.summary)).toBeLessThan(text.indexOf('31 December 2026'));
     expect(text).toContain('3. Reply on the portal.');
+  });
+
+  it('leaves a bare "Not mentioned" out of the read-aloud text and the calendar note', () => {
+    const silent = {
+      ...validAnalysis,
+      deadline: { date: '2026-12-31', consequenceIfMissed: 'Not mentioned.' },
+    };
+    expect(consequenceText(silent)).toBe('');
+    expect(buildReadAloudText(silent, '31 December 2026')).not.toMatch(/Not mentioned/);
+    expect(buildDeadlineEvent(silent)?.details).not.toMatch(/Not mentioned|If missed/);
+    expect(consequenceText(validAnalysis)).toBe('A penalty may be added.');
   });
 
   it('builds a calendar event only when a date exists', () => {
