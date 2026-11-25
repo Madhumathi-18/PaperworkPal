@@ -6,11 +6,10 @@ Built for people who struggle with jargon-heavy paperwork because of language, l
 
 > Paperwork Pal explains documents. It does **not** give legal, tax or financial advice, and it always says so.
 
-|                |                                                                                                           |
-| -------------- | --------------------------------------------------------------------------------------------------------- |
-| **Live demo**  | [paperwork-pal-three.vercel.app](https://paperwork-pal-three.vercel.app/) (see [Deployment](#deployment)) |
-| **Screenshot** | _Add `docs/screenshot.png` after deploying_                                                               |
-| **Hackathon**  | Promptwars x AI Vibeathon 2026                                                                            |
+|               |                                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------- |
+| **Live demo** | [paperwork-pal-three.vercel.app](https://paperwork-pal-three.vercel.app/) (see [Deployment](#deployment)) |
+| **Hackathon** | PromptWars x Echo Engineer's AI Vibeathon 2026                                                            |
 
 ## Features
 
