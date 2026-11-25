@@ -171,12 +171,12 @@ describe('accessibility toolbar', () => {
   it('changes text size, marks the active choice and remembers it', async () => {
     const user = userEvent.setup();
     render(<AccessibilityToolbar />);
-    await user.click(screen.getByRole('button', { name: 'Larger text' }));
-    expect(screen.getByRole('button', { name: 'Larger text' })).toHaveAttribute(
+    await user.click(screen.getByRole('button', { name: /Larger text/ }));
+    expect(screen.getByRole('button', { name: /Larger text/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    expect(screen.getByRole('button', { name: 'Normal text' })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /Normal text/ })).toHaveAttribute(
       'aria-pressed',
       'false',
     );
@@ -212,9 +212,16 @@ describe('accessibility toolbar', () => {
       throw new Error('blocked');
     });
     render(<AccessibilityToolbar />);
-    await user.click(screen.getByRole('button', { name: 'Larger text' }));
+    await user.click(screen.getByRole('button', { name: /Larger text/ }));
     expect(document.documentElement.dataset.textSize).toBe('large');
     vi.restoreAllMocks();
+  });
+
+  it('keeps the visible A- / A / A+ label inside each accessible name (WCAG 2.5.3)', () => {
+    render(<AccessibilityToolbar />);
+    expect(screen.getByRole('button', { name: 'A- Smaller text' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'A Normal text' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'A+ Larger text' })).toBeInTheDocument();
   });
 });
 

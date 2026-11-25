@@ -91,7 +91,7 @@ Pick a language, then upload a photo or PDF, paste text, dictate, or try a sampl
 
 ### Testing
 
-Run everything with one command: `npm test` (277 tests in 22 files, about 30 seconds). `npm run test:coverage` reports about 98% line coverage of `src/lib`.
+Run everything with one command: `npm test` (288 tests in 23 files, about 30 seconds). `npm run test:coverage` reports about 98% line coverage of `src/lib`.
 
 | Area                | Tests                                                                                                                                                                                                                         |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

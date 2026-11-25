@@ -22,11 +22,11 @@ export function AccessibilityToolbar(): React.ReactElement {
             key={size}
             type="button"
             className="btn btn-secondary px-3"
-            aria-label={name}
             aria-pressed={preferences.textSize === size}
             onClick={() => update({ textSize: size })}
           >
-            <span aria-hidden="true">{label}</span>
+            {/* The visible label stays in the accessible name (WCAG 2.5.3 Label in Name). */}
+            <span>{label}</span> <span className="sr-only">{name}</span>
           </button>
         ))}
       </div>
